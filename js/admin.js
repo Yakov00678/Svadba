@@ -1,4 +1,4 @@
-// ===== ПАРОЛЬ (измените на свой!) =====
+// ===== ПАРОЛЬ1 =====
 const ADMIN_PASSWORD = 'Rewqazxcv';
 
 // ===== ПРОВЕРКА ПАРОЛЯ =====
@@ -27,17 +27,18 @@ function logout() {
     document.getElementById('errorMessage').textContent = '';
 }
 
-// ===== ЗАГРУЗКА ДАННЫХ В АДМИНКЕ =====
+// ===== ЗАГРУЗКА ДАННЫХ =====
 async function loadAdminData() {
-    // Тянем чистые данные из Google Apps Script
+    // Чистим локальный мусор перед запросом
+    localStorage.removeItem('weddingResponses'); 
+
     const responses = await window.WeddingStorage?.loadResponses?.() || [];
 
-    // Считаем тех, кто нажал "Приду"
     const confirmedCount = responses.filter(r => r.attendance === 'yes').length;
     document.getElementById('confirmedCount').textContent = confirmedCount;
     document.getElementById('responsesCount').textContent = responses.length;
 
-    // Считаем общее количество гостей (только для подтвержденных, с защитой от NaN)
+    // Безопасный подсчет гостей (только для тех, кто придет)
     const totalGuests = responses.reduce((sum, r) => {
         if (r.attendance !== 'yes') return sum;
         const count = parseInt(r.guests, 10);
@@ -46,7 +47,6 @@ async function loadAdminData() {
     
     document.getElementById('totalGuests').textContent = totalGuests;
 
-    // Отрисовываем таблицу на экране
     fillTable(responses);
 }
 
@@ -102,11 +102,16 @@ async function downloadCSV() {
         r.date
     ]);
 
-    const totalGuests = responses.reduce((sum, r) => sum + parseInt(r.guests || 0, 10), 0);
+    // Синхронизированный точный подсчет гостей
+    const totalGuests = responses.reduce((sum, r) => {
+        if (r.attendance !== 'yes') return sum;
+        const count = parseInt(r.guests, 10);
+        return sum + (isNaN(count) ? 0 : count);
+    }, 0);
 
     let csvContent = 'data:text/csv;charset=utf-8,\uFEFF';
     csvContent += `Статистика,,,,\n`;
-    csvContent += `Подтвердили,${responses.length},,,\n`;
+    csvContent += `Подтвердили,${responses.filter(r => r.attendance === 'yes').length},,,\n`;
     csvContent += `Всего гостей,${totalGuests},,,\n`;
     csvContent += `,,,,\n`;
     csvContent += headers.join(',') + '\n';
@@ -134,10 +139,16 @@ async function downloadExcel() {
         return;
     }
 
+    const totalGuests = responses.reduce((sum, r) => {
+        if (r.attendance !== 'yes') return sum;
+        const count = parseInt(r.guests, 10);
+        return sum + (isNaN(count) ? 0 : count);
+    }, 0);
+
     const data = [
         ['Статистика', '', '', '', '', '', '', '', ''],
         ['Подтвердили', responses.filter(r => r.attendance === 'yes').length, '', '', '', '', '', '', ''],
-        ['Всего гостей', responses.reduce((sum, r) => sum + (r.attendance === 'yes' ? parseInt(r.guests || 0, 10) : 0), 0), '', '', '', '', '', '', ''],
+        ['Всего гостей', totalGuests, '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', ''],
         ['ID', 'Имя', 'Количество гостей', 'Приду', 'Транспорт', 'Предпочтения', 'Аллергии', 'Комментарий', 'Дата']
     ];
@@ -161,7 +172,7 @@ async function downloadExcel() {
     XLSX.utils.book_append_sheet(wb, ws, 'Ответы');
     XLSX.writeFile(wb, `свадьба_ответы_${new Date().toISOString().slice(0,10)}.xlsx`);
 
-    alert(`✅ Excel файл сохранён!\nОтветов: ${responses.length}\nГостей: ${data[2][1]}`);
+    alert(`✅ Excel файл сохранён!\nОтветов: ${responses.length}\nГостей: ${totalGuests}`);
 }
 
 // ===== СКАЧАТЬ JSON =====
@@ -173,10 +184,16 @@ async function downloadJSON() {
         return;
     }
 
+    const totalGuests = responses.reduce((sum, r) => {
+        if (r.attendance !== 'yes') return sum;
+        const count = parseInt(r.guests, 10);
+        return sum + (isNaN(count) ? 0 : count);
+    }, 0);
+
     const data = {
         statistics: {
             confirmed: responses.filter(r => r.attendance === 'yes').length,
-            totalGuests: responses.reduce((sum, r) => sum + (r.attendance === 'yes' ? parseInt(r.guests || 0, 10) : 0), 0)
+            totalGuests: totalGuests
         },
         responses: responses
     };
@@ -211,22 +228,27 @@ async function downloadTXT() {
     content += `   Дата: 15 июня 2026 года\n`;
     content += `═══════════════════════════════════\n\n`;
 
-    const totalGuests = responses.reduce((sum, r) => sum + (r.attendance === 'yes' ? parseInt(r.guests || 0, 10) : 0), 0);
+    const totalGuests = responses.reduce((sum, r) => {
+        if (r.attendance !== 'yes') return sum;
+        const count = parseInt(r.guests, 10);
+        return sum + (isNaN(count) ? 0 : count);
+    }, 0);
+
     content += `Статистика:\n`;
-    content += `• Подтвердили: ${responses.length} человек(а)\n`;
+    content += `• Подтвердили: ${responses.filter(r => r.attendance === 'yes').length} человек(а)\n`;
     content += `• Всего гостей: ${totalGuests}\n\n`;
     content += `═══════════════════════════════════\n\n`;
 
     responses.forEach((response, index) => {
         content += `Ответ #${index + 1}\n`;
         content += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        content += `👤 Имя: ${response.name}\n`;
-        content += `👥 Гостей: ${response.guests}\n`;
+        content += `👤 Имя: ${response.name || '—'}\n`;
+        content += `👥 Гостей: ${response.guests || '0'}\n`;
         content += `✅ Приду: ${response.attendance === 'yes' ? 'Да' : (response.attendance === 'no' ? 'Нет' : '—')}\n`;
         content += `🚗 Транспорт: ${response.transport === 'yes' ? 'Да' : (response.transport === 'no' ? 'Нет' : '—')}\n`;
         content += `⚠️ Аллергии: ${response.allergies || 'Нет'}\n`;
         content += `📝 Комментарий: ${response.message || 'Нет'}\n`;
-        content += `📅 Дата: ${response.date}\n`;
+        content += `📅 Дата: ${response.date || '—'}\n`;
         content += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
     });
 
