@@ -27,17 +27,26 @@ function logout() {
     document.getElementById('errorMessage').textContent = '';
 }
 
-// ===== ЗАГРУЗКА ДАННЫХ =====
+// ===== ЗАГРУЗКА ДАННЫХ В АДМИНКЕ =====
 async function loadAdminData() {
+    // Тянем чистые данные из Google Apps Script
     const responses = await window.WeddingStorage?.loadResponses?.() || [];
 
+    // Считаем тех, кто нажал "Приду"
     const confirmedCount = responses.filter(r => r.attendance === 'yes').length;
     document.getElementById('confirmedCount').textContent = confirmedCount;
     document.getElementById('responsesCount').textContent = responses.length;
 
-    const totalGuests = responses.reduce((sum, r) => sum + parseInt(r.guests || 0, 10), 0);
+    // Считаем общее количество гостей (только для подтвержденных, с защитой от NaN)
+    const totalGuests = responses.reduce((sum, r) => {
+        if (r.attendance !== 'yes') return sum;
+        const count = parseInt(r.guests, 10);
+        return sum + (isNaN(count) ? 0 : count);
+    }, 0);
+    
     document.getElementById('totalGuests').textContent = totalGuests;
 
+    // Отрисовываем таблицу на экране
     fillTable(responses);
 }
 

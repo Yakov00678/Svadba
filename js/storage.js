@@ -1,18 +1,6 @@
 (function () {
-  const STORAGE_KEY = 'weddingResponses';
+  // Твоя ссылка на Google Apps Script
   const API_URL = (window.WEDDING_RESPONSES_API_URL || 'https://script.google.com/macros/s/AKfycbyGA_alBHdHPPa8MON4zTzCjq2FSHqntHcgy2hj6WjX0cL52Edg0yh1WV4p9ywV8qcD/exec').trim();
-
-  function getLocalResponses() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    } catch {
-      return [];
-    }
-  }
-
-  function saveLocalResponses(responses) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
-  }
 
   function normalizeResponse(item = {}) {
     return {
@@ -28,44 +16,31 @@
     };
   }
 
-  function mergeResponses(remoteResponses, localResponses) {
-    const map = new Map();
-    const all = [...remoteResponses, ...localResponses];
-
-    all.forEach((item) => {
-      const normalized = normalizeResponse(item);
-      const key = normalized.id || `${normalized.name}|${normalized.guests}|${normalized.attendance}|${normalized.date}`;
-      if (!map.has(key)) {
-        map.set(key, normalized);
-      }
-    });
-
-    return Array.from(map.values());
-  }
-
+  // ЗАГРУЗКА: Строго из Google Таблицы
   async function loadResponses() {
-    const localResponses = getLocalResponses();
-
-    if (!API_URL) {
-      return localResponses;
-    }
+    if (!API_URL) return [];
 
     try {
-      const response = await fetch(API_URL, { method: 'GET' });
+      // t=Date.now() нужен, чтобы браузер не отдавал старую страницу из своего кэша
+      const response = await fetch(`${API_URL}?t=${Date.now()}`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-store'
+      });
+      
       if (!response.ok) throw new Error('Network error');
 
-      const data = await response.json();
-      const remoteResponses = Array.isArray(data) ? data : [];
-      const merged = mergeResponses(remoteResponses.map(normalizeResponse), localResponses);
-
-      saveLocalResponses(merged);
-      return merged;
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : [];
+      
+      return (Array.isArray(data) ? data : []).map(normalizeResponse);
     } catch (error) {
       console.error('Ошибка загрузки из Google:', error);
-      return localResponses;
+      return []; // Если сеть упала, отдаем пустой массив, а не старый мусор
     }
   }
 
+  // ОТПРАВКА: Прямой POST-запрос без сохранения внутри телефона
   async function saveResponse(payload) {
     const response = normalizeResponse({
       ...payload,
@@ -73,42 +48,40 @@
       date: new Date().toLocaleString('ru-RU')
     });
 
-    const localResponses = getLocalResponses();
-    localResponses.push(response);
-    saveLocalResponses(localResponses);
-
     if (API_URL) {
       try {
-        await fetch(API_URL, {
+        const responseFetch = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: JSON.stringify(response)
         });
 
+        if (!responseFetch.ok) throw new Error('Google error status');
+        
+        // После успешной отправки сразу скачиваем обновленный список из Google
         return await loadResponses();
       } catch (error) {
         console.error('Ошибка отправки в Google:', error);
-        return localResponses;
       }
     }
-
-    return localResponses;
+    return []; 
   }
 
+  // ОЧИСТКА: Полное удаление строк в Google Таблице
   async function clearResponses() {
     if (API_URL) {
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: JSON.stringify({ action: 'clear' })
         });
       } catch (error) {
         console.error('Ошибка очистки в Google:', error);
       }
     }
-
-    saveLocalResponses([]);
     return [];
   }
 
