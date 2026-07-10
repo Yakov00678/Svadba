@@ -45,7 +45,7 @@ async function loadResponses() {
 // Загружаем при старте
 loadResponses();
 
-// ===== ОБРАБОТКА ФОРМЫ НА ГЛАВНОЙ =====
+// ===== ОБРАБОТКА ФОРМЫ =====
 document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -57,17 +57,15 @@ document.getElementById('rsvpForm').addEventListener('submit', async function(e)
         return;
     }
 
-    // saveResponse теперь вернет актуальный массив из Google Таблицы
     const responses = await saveResponse(name, guests);
     
     // Считаем общее число людей во всей базе данных Google
     const totalGuests = responses.reduce((sum, r) => {
-        if (r.attendance !== 'yes') return sum;
         const count = parseInt(r.guests, 10);
         return sum + (isNaN(count) ? 0 : count);
     }, 0);
 
-    alert(`Спасибо, ${name}!\n\n✅ Ваш ответ записан в Google Таблицу.\n👥 Вы идете в составе: ${guests} чел.\n\n📊 Всего подтвержденных гостей в базе: ${totalGuests}`);
+    alert(`Спасибо, ${name}!\n\n✅ Ваш ответ записан\n👥 Гостей: ${guests}\n\n📊 Всего гостей в базе: ${totalGuests}`);
 
     this.reset();
 });
