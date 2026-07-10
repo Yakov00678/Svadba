@@ -59,6 +59,14 @@
     box-sizing: border-box;
 }
 
+:root {
+    --content-width: min(100%, 960px);
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 /* ===== ОСНОВНЫЕ СТИЛИ ===== */
 body {
     font-family: 'DelaGothicOne-Regular';
@@ -67,6 +75,7 @@ body {
     background: linear-gradient(135deg, #CCA987 0%, #85582C 100%);
     min-height: 100vh;
     padding: 10px;
+    overflow-x: hidden;
 }
 
 .container {
@@ -153,31 +162,31 @@ h1, h2 {
     box-sizing: border-box;
     word-break: break-word;
     overflow: hidden;
-    
 }
+
 .welcome img {
     display: block;
     max-width: 100%;
     width: 50%;
     height: auto;
     margin: 0 auto;
-
     object-fit: contain;
     max-height: 30vw;
-    
 }
 
 /* ===== welcome 2 ===== */
+.welcome_two img {
+    display: block;
+    margin: 0 auto;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    max-width: 50%;
+    height: auto;
+}
 
-.welcome_two img{
-
-    display: block;       /* Делаем картинку блочным элементом */
-    margin: 0 auto;       /* Центрируем по горизонтали */
-    border-radius: 20px;  /* Скругление углов (чем больше число, тем круглее) */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Тень: сдвиг, размытие, цвет */
-    
-    max-width: 50%;      /* Адаптивность */
-    height: auto;         /* Сохранение пропорций */
+.welcome h1 {
+    font-family: Cormorant-BoldItalic;
+    font-size: 150%;
 }
 
 @media (max-width: 1024px) {
@@ -190,7 +199,6 @@ h1, h2 {
     .welcome img {
         max-width: 60vw;
         max-height: 20vw;
-        
     }
 }
 
@@ -199,24 +207,27 @@ h1, h2 {
         font-size: 1rem;
         padding: 8px 2vw 2vw 2vw;
         gap: 6px;
-        max-height: 180px;
+        max-height: none;
     }
     .welcome img {
+        width: 100%;
         max-width: 90vw;
-        max-height: 30vw;
+        max-height: none;
         border-radius: 8px;
     }
-}
-
-.welcome h1{
-    font-family: Cormorant-BoldItalic;
-    font-size: 150%;
+    .welcome_two img {
+        width: 100%;
+        max-width: 90vw;
+        border-radius: 8px;
+    }
 }
 
 
 /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
 .content {
     padding: 40px;
+    max-width: 100%;
+    margin: 0 auto;
 }
 
 .section {
@@ -302,7 +313,6 @@ h1, h2 {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-
 .timer-number {
     font-size: 3.2rem;
     font-weight: 700;
@@ -321,26 +331,28 @@ h1, h2 {
     font-family: 'Cormorant-Light';
     opacity: 0.85;
 }
+
 @media (max-width: 600px) {
     .timer {
-        gap: 6px;
-        padding: 10px 4px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        padding: 10px 8px;
         max-width: 100%;
-        flex-wrap: nowrap;
     }
     .timer-item {
         min-width: 0;
         flex: 1;
-        padding: 8px 2px 6px 2px;
+        padding: 10px 6px;
         border-radius: 10px;
-        margin: 0 2px;
+        margin: 0;
     }
     .timer-number {
         font-size: 1.35rem;
         letter-spacing: 0.5px;
     }
     .timer-label {
-        font-size: 0.6rem;
+        font-size: 0.7rem;
         letter-spacing: 0.4px;
     }
 }
@@ -353,6 +365,12 @@ h1, h2 {
     overflow: hidden;
     margin-top: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 600px) {
+    .map {
+        height: 180px;
+    }
 }
 
 /* ===== ФОРМА ОТВЕТА ===== */
@@ -561,9 +579,10 @@ h1, h2 {
 }
 @media (max-width: 600px) {
     .rsvp-form {
-        padding: 12px 2vw 10px 2vw;
+        padding: 14px 12px 12px;
         border-radius: 8px;
-        max-width: 98vw;
+        width: 100%;
+        max-width: 100%;
     }
     .form-group input,
     .form-group textarea,
@@ -582,7 +601,7 @@ h1, h2 {
 /* ===== ФУТЕР ===== */
 .footer {
     text-align: center;
-    padding: 10px;
+    padding: 16px 12px;
     background: #f8f9fa;
     color: #666;
     font-size: 1rem;
@@ -647,24 +666,24 @@ h1, h2 {
         box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     }
     .header {
-        height: 140px;
-        min-height: 80px;
-        aspect-ratio: 16/11;
+        height: clamp(150px, 38vw, 220px);
+        min-height: 120px;
+        aspect-ratio: 16/10;
         padding: 10px 0;
     }
     .header-content {
-        padding: 5px;
+        padding: 8px;
     }
     .header h1 {
-        font-size: 1.3rem;
+        font-size: clamp(1.25rem, 5vw, 1.7rem);
         margin-bottom: 5px;
     }
     .header p {
-        font-size: 1rem;
-        line-height: 1.5;
+        font-size: 0.95rem;
+        line-height: 1.4;
     }
     .content {
-        padding: 8px;
+        padding: 12px;
     }
     .section {
         margin-bottom: 20px;
@@ -680,10 +699,8 @@ h1, h2 {
         font-size: 1rem;
     }
     .map {
-        height: 180px;
-    }
-    .rsvp-form {
-        padding: 10px;
+        height: 200px;
+        min-height: 180px;
     }
     .submit-btn {
         padding: 10px;
