@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приглашение на свадьбу</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ХЕДЕР -->
+        <div class="header">
+            <div class="header-content">
+                <!--<h1>Яков & Мария</h1>
+                <p>Приглашают вас на нашу роспись</p> -->
+            </div>
+        </div>
+
+        <!--    НЕБОЛЬШОЕ ПРИВЕТСВИЕ -->
+        <div class="welcome">
+            <h1>Дорогие друзья и близкие!</h1>
+            <p>Мы рады пригласить вас на нашу свадьбу, которая состоится
+                8 августа 2026 года. Это будет особенный день, наполненный любовью,
+                радостью и незабываемыми моментами.
+                Мы будем счастливы разделить этот день с вами и создать вместе прекрасные воспоминания.
+            </p>
+            <img src="images/Cheldren.png" alt="Дети" />
+        </div>
+
+        <!--    НЕБОЛЬШОЕ ПРИВЕТСВИЕ 2-->
+            <div class="welcome_two">
+                <img src="images/2Cat.jpg" alt='2Cat.jpg'>
+            </div>
+
+
+        <!-- КОНТЕНТ -->
+        <div class="content">
+            <!-- ДАТА И ВРЕМЯ -->
+            <div class="section">
+                <h2>Дата и время</h2>
+                <p><strong>8 августа 2026 года в 15:30</strong></p>
+
+                <!-- ТАЙМЕР -->
+                <div class="timer" id="countdown">
+                    <div class="timer-item">
+                        <div class="timer-number" id="days">00</div>
+                        <div class="timer-label">Дней</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-number" id="hours">00</div>
+                        <div class="timer-label">Часов</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-number" id="minutes">00</div>
+                        <div class="timer-label">Минут</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-number" id="seconds">00</div>
+                        <div class="timer-label">Секунд</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- МЕСТО ПРОВЕДЕНИЯ -->
+            <div class="section">
+                <h2>Место проведения</h2>
+                <p>📍 <strong>Центральный загс</strong></p>
+                <p></p>
+                <iframe 
+                    class="map" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1134.2975005679677!2d86.10061921760914!3d55.34761691725315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x42d80951a2f78921%3A0xef7cb208becdeedb!2z0JfQkNCT0KEg0KbQtdC90YLRgNCw0LvRjNC90L7Qs9C-INGA0LDQudC-0L3QsCDQsy4g0JrQtdC80LXRgNC-0LLQvg!5e0!3m2!1sru!2suk!4v1783356053910!5m2!1sru!2suk" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">
+                    frameborder="0" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <!-- ПРОГРАММА -->
+            <div class="section program">
+                <h2>Программа</h2>
+                <p><strong>15:30 — Сбор гостей у ЗАГСа </strong> </p>
+                <p><strong>16:00 — Регистрация в ЗАГСе </strong></p>
+            </div>
+
+            <!-- ФОРМА ОТВЕТА -->
+            <div class="section">
+                <h2>Подтвердите присутствие</h2>
+                <form class="rsvp-form" id="rsvpForm">
+                    <div class="form-group">
+                        <label for="name">Ваше имя *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="guests">Количество гостей *</label>
+                        <select id="guests" required>
+                            <option value="">Выберите...</option>
+                            <option value="1">1 гость</option>
+                            <option value="2">2 гостя</option>
+                            <option value="3">3 гостя</option>
+                            <option value="4">4 гостя</option>
+                        </select>
+                    </div>
+                    <div class="form-group toggle-group">
+                        <label for="attendanceToggle">Будете ли вы присутствовать? *</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="attendanceToggle" name="attendance" />
+                            <label class="toggle-label" for="attendanceToggle">
+                                <span class="toggle-inner"></span>
+                                <span class="toggle-switch-text">
+                                    <span class="yes">Да</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group toggle-group">
+                    <button type="submit" class="submit-btn">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="welcome">
+            <h1>Будем вас ждать!</h1>
+            <img src="images/1Cat.jpg" alt="Снежинка" />
+        </div>
+
+
+        <!-- ФУТЕР -->
+        <div class="footer">
+            <p>С любовью, Мария и Яков ❤️</p>
+            <p>Телефон для связи: +7 (908) 943-27-66</p>
+        </div>
+    </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
+    <script src="js/script.js"></script>
+</body>
+</html>

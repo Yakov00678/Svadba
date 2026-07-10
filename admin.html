@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель - Свадьба</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ФОРМА ВХОДА -->
+        <div id="loginSection" class="login-section">
+            <div class="login-box">
+                <h1>🔐 Админ панель</h1>
+                <p>Пожалуйста, введите пароль для доступа</p>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="password">Пароль:</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            placeholder="Введите пароль" 
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button type="submit" class="btn-login">Войти</button>
+                </form>
+                
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- АДМИН ПАНЕЛЬ (скрыта до ввода пароля) -->
+        <div id="adminSection" class="admin-section" style="display: none;">
+            <div class="admin-header">
+                <h1>📊 Админ панель</h1>
+                <button onclick="logout()" class="btn-logout">🚪 Выйти</button>
+            </div>
+
+            <!-- СТАТИСТИКА -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>👥 Подтвердили</h3>
+                    <p id="confirmedCount" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>👤 Всего гостей</h3>
+                    <p id="totalGuests" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📝 Ответов</h3>
+                    <p id="responsesCount" class="stat-number">0</p>
+                </div>
+            </div>
+
+            <!-- КНОПКИ СКАЧИВАНИЯ -->
+            <div class="download-section">
+                <h2>📥 Скачать данные</h2>
+                <div class="button-group">
+                    <button onclick="downloadCSV()" class="btn-download csv">
+                        📄 CSV (Excel)
+                    </button>
+                    <button onclick="downloadExcel()" class="btn-download excel">
+                        📊 Excel (.xlsx)
+                    </button>
+                    <button onclick="downloadJSON()" class="btn-download json">
+                        💾 JSON
+                    </button>
+                    <button onclick="downloadTXT()" class="btn-download txt">
+                        📝 TXT
+                    </button>
+                </div>
+            </div>
+
+            <!-- ТАБЛИЦА С ОТВЕТАМИ -->
+            <div class="responses-section">
+                <h2>📋 Все ответы</h2>
+                <div id="responsesTable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Гостей</th>
+                                <th>Приду?</th>
+                                <th>Транспорт</th>
+                                <th>Предпочтения</th>
+                                <th>Аллергии</th>
+                                <th>Комментарий</th>
+                                <th>Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 20px;">
+                                    Нет данных
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- КНОПКИ УПРАВЛЕНИЯ -->
+            <div class="control-section">
+                <h2>⚙️ Управление</h2>
+                <div class="button-group">
+                    <button onclick="showResponses()" class="btn-control info">
+                        ℹ️ Показать подробнее
+                    </button>
+                    <button onclick="clearResponses()" class="btn-control clear">
+                        🗑️ Очистить всё
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
