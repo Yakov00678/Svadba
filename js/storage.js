@@ -1,7 +1,6 @@
 (function () {
   const STORAGE_KEY = 'weddingResponses';
-  // 1. ОБЯЗАТЕЛЬНО ЗАМЕНИТЕ ССЫЛКУ НИЖЕ НА СВОЮ ИЗ GOOGLE APPS SCRIPT!
-  const API_URL = (window.WEDDING_RESPONSES_API_URL || 'https://script.google.com/macros/s/AKfycbwBJ2k0Nl93UhzeGLFPlFCOKIba_jtAZU9-2r8C5Pngg_7-f1lVRdukjTDL943em-fE/exec').trim();
+  const API_URL = (window.WEDDING_RESPONSES_API_URL || 'https://script.google.com/macros/s/AKfycbyGA_alBHdHPPa8MON4zTzCjq2FSHqntHcgy2hj6WjX0cL52Edg0yh1WV4p9ywV8qcD/exec').trim();
 
   function getLocalResponses() {
     try {
@@ -29,22 +28,41 @@
     };
   }
 
+  function mergeResponses(remoteResponses, localResponses) {
+    const map = new Map();
+    const all = [...remoteResponses, ...localResponses];
+
+    all.forEach((item) => {
+      const normalized = normalizeResponse(item);
+      const key = normalized.id || `${normalized.name}|${normalized.guests}|${normalized.attendance}|${normalized.date}`;
+      if (!map.has(key)) {
+        map.set(key, normalized);
+      }
+    });
+
+    return Array.from(map.values());
+  }
+
   async function loadResponses() {
+    const localResponses = getLocalResponses();
+
     if (!API_URL) {
-      return getLocalResponses();
+      return localResponses;
     }
 
     try {
       const response = await fetch(API_URL, { method: 'GET' });
       if (!response.ok) throw new Error('Network error');
+
       const data = await response.json();
-      const responses = Array.isArray(data) ? data : [];
-      const normalized = responses.map(normalizeResponse);
-      saveLocalResponses(normalized);
-      return normalized;
+      const remoteResponses = Array.isArray(data) ? data : [];
+      const merged = mergeResponses(remoteResponses.map(normalizeResponse), localResponses);
+
+      saveLocalResponses(merged);
+      return merged;
     } catch (error) {
-      console.error('Ошибка загрузки данных из Google:', error);
-      return getLocalResponses();
+      console.error('Ошибка загрузки из Google:', error);
+      return localResponses;
     }
   }
 
@@ -55,23 +73,26 @@
       date: new Date().toLocaleString('ru-RU')
     });
 
+    const localResponses = getLocalResponses();
+    localResponses.push(response);
+    saveLocalResponses(localResponses);
+
     if (API_URL) {
       try {
-        // Изменили Content-Type на text/plain для обхода капризов CORS в Google Apps Script
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' }, 
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(response)
         });
+
+        return await loadResponses();
       } catch (error) {
         console.error('Ошибка отправки в Google:', error);
+        return localResponses;
       }
     }
 
-    const responses = getLocalResponses();
-    responses.push(response);
-    saveLocalResponses(responses);
-    return responses;
+    return localResponses;
   }
 
   async function clearResponses() {
@@ -79,7 +100,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'clear' })
         });
       } catch (error) {
