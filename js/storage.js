@@ -15,17 +15,21 @@
     };
   }
 
-  // ЗАГРУЗКА: Теперь строго из Google Таблицы напрямую
+// ЗАГРУЗКА: Строго из Google Таблицы напрямую (с жестким пробитием кэша браузера)
   async function loadResponses() {
     if (!API_URL) return [];
 
     try {
-      // КРИТИЧЕСКИ ВАЖНО: redirect: 'follow' заставляет браузер пройти по ссылке Google и забрать данные
-      const response = await fetch(`${API_URL}?t=${Date.now()}`, {
+      // Подмешиваем случайный параметр в самый конец ссылки, 
+      // чтобы браузер думал, что это совершенно новый адрес, и делал реальный запрос в Google
+      const separator = API_URL.includes('?') ? '&' : '?';
+      const cacheBusterUrl = `${API_URL}${separator}_=${Date.now()}`;
+
+      const response = await fetch(cacheBusterUrl, {
         method: 'GET',
         mode: 'cors',
         redirect: 'follow', 
-        cache: 'no-store'
+        cache: 'no-store' // Запрещаем сохранять ответ в памяти
       });
       
       if (!response.ok) throw new Error('Network error');
