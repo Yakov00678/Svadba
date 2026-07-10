@@ -28,41 +28,28 @@
     };
   }
 
-  function mergeResponses(remoteResponses, localResponses) {
-    const map = new Map();
-    const all = [...remoteResponses, ...localResponses];
-
-    all.forEach((item) => {
-      const normalized = normalizeResponse(item);
-      const key = normalized.id || `${normalized.name}|${normalized.guests}|${normalized.attendance}|${normalized.date}`;
-      if (!map.has(key)) {
-        map.set(key, normalized);
-      }
-    });
-
-    return Array.from(map.values());
-  }
-
   async function loadResponses() {
-    const localResponses = getLocalResponses();
-
-    if (!API_URL) {
-      return localResponses;
-    }
+    if (!API_URL) return getLocalResponses();
 
     try {
-      const response = await fetch(API_URL, { method: 'GET' });
+      // Добавляем t=Date.now(), чтобы браузер не кэшировал старый ответ
+      const response = await fetch(`${API_URL}?t=${Date.now()}`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-store'
+      });
       if (!response.ok) throw new Error('Network error');
 
-      const data = await response.json();
-      const remoteResponses = Array.isArray(data) ? data : [];
-      const merged = mergeResponses(remoteResponses.map(normalizeResponse), localResponses);
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : [];
+      const remoteResponses = (Array.isArray(data) ? data : []).map(normalizeResponse);
 
-      saveLocalResponses(merged);
-      return merged;
+      // Перезаписываем кэш чистыми данными из сети
+      saveLocalResponses(remoteResponses);
+      return remoteResponses;
     } catch (error) {
       console.error('Ошибка загрузки из Google:', error);
-      return localResponses;
+      return getLocalResponses();
     }
   }
 
@@ -73,25 +60,24 @@
       date: new Date().toLocaleString('ru-RU')
     });
 
-    const localResponses = getLocalResponses();
-    localResponses.push(response);
-    saveLocalResponses(localResponses);
-
     if (API_URL) {
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: JSON.stringify(response)
         });
-
+        // После успешной отправки запрашиваем актуальную базу из Google
         return await loadResponses();
       } catch (error) {
         console.error('Ошибка отправки в Google:', error);
-        return localResponses;
       }
     }
 
+    const localResponses = getLocalResponses();
+    localResponses.push(response);
+    saveLocalResponses(localResponses);
     return localResponses;
   }
 
@@ -100,14 +86,13 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: JSON.stringify({ action: 'clear' })
         });
       } catch (error) {
         console.error('Ошибка очистки в Google:', error);
       }
     }
-
     saveLocalResponses([]);
     return [];
   }
