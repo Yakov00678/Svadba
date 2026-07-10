@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = 'weddingResponses';
-  const API_URL = (window.WEDDING_RESPONSES_API_URL || 'https://script.google.com/macros/s/AKfycbyi-8YTE9U64XJJUgSOVNi6mMyROZ39v0BcVQzfW0aimYtZIomOQAogEC6Y9aqQTIrEvA/exec').trim();
+  const API_URL = (window.WEDDING_RESPONSES_API_URL || 'https://script.google.com/macros/s/AKfycbyGA_alBHdHPPa8MON4zTzCjq2FSHqntHcgy2hj6WjX0cL52Edg0yh1WV4p9ywV8qcD/exec').trim();
 
   function getLocalResponses() {
     try {
