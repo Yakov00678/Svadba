@@ -27,18 +27,17 @@ function logout() {
     document.getElementById('errorMessage').textContent = '';
 }
 
-// ===== ЗАГРУЗКА ДАННЫХ =====
+// ===== ЗАГРУЗКА ДАННЫХ В АДМИНКЕ =====
 async function loadAdminData() {
-    // Принудительно чистим кэш перед рендером админки
-    localStorage.removeItem('weddingResponses'); 
-
+    // Тянем чистые данные из Google Apps Script
     const responses = await window.WeddingStorage?.loadResponses?.() || [];
 
+    // Считаем тех, кто нажал "Приду"
     const confirmedCount = responses.filter(r => r.attendance === 'yes').length;
     document.getElementById('confirmedCount').textContent = confirmedCount;
     document.getElementById('responsesCount').textContent = responses.length;
 
-    // Считаем общее количество гостей только у тех, кто нажал "Приду"
+    // Считаем общее количество гостей (только для подтвержденных, с защитой от NaN)
     const totalGuests = responses.reduce((sum, r) => {
         if (r.attendance !== 'yes') return sum;
         const count = parseInt(r.guests, 10);
@@ -47,6 +46,7 @@ async function loadAdminData() {
     
     document.getElementById('totalGuests').textContent = totalGuests;
 
+    // Отрисовываем таблицу на экране
     fillTable(responses);
 }
 
