@@ -65,7 +65,7 @@ document.getElementById('rsvpForm').addEventListener('submit', async function(e)
         return sum + (isNaN(count) ? 0 : count);
     }, 0);
 
-    alert(`Спасибо, ${name}!\n\n✅ Ваш ответ записан\n👥 Гостей: ${guests}\n\n📊 Всего гостей в базе: ${totalGuests}`);
+    alert(`Спасибо, ${name}!\n\n✅ Ваш ответ записан\n👥 Гостей: ${guests}`);
 
     this.reset();
 });
